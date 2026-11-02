@@ -51,8 +51,19 @@ npm install
 cp .env.example .env
 docker compose up mongo redis mailpit storage storage-setup
 npm run start:identity
+npm run start:community
 npm run start:gateway
 ```
+
+## Sample data
+
+Adds 30 sample posts from 5 sample users, and can be run again safely:
+
+```
+docker exec landed-community-1 node dist/apps/community/main --seed
+```
+
+Log in as `ayesha.demo@landed.local` with the password `LandedDemo1`. Without Docker, use `npm run seed`.
 
 ## Checks
 
@@ -63,6 +74,24 @@ npm test
 ```
 
 The first test run downloads a MongoDB binary, so it takes a little longer.
+
+## Feed API
+
+All of these need a logged-in user.
+
+| Endpoint | Body | Result |
+| --- | --- | --- |
+| `GET /api/feed?tab=&cursor=&limit=` | | `{ items, nextCursor }`. Tabs are `for_you`, `latest`, `unsolved`, `trending` |
+| `GET /api/tags/trending` | | Top 8 tags from the last 7 days, cached for 10 minutes |
+| `POST /api/posts` | `text, tags?` | The new post |
+| `PATCH /api/posts/:id` | `text?, tags?` | The updated post. Owner only |
+| `DELETE /api/posts/:id` | | 204. Owner only |
+| `PUT /api/posts/:id/reaction` | `type` | `{ reactionCounts, myReaction }` |
+| `DELETE /api/posts/:id/reaction` | | `{ reactionCounts, myReaction }` |
+| `POST /api/posts/:id/save` | | `{ isSaved, saveCount }` |
+| `DELETE /api/posts/:id/save` | | `{ isSaved, saveCount }` |
+
+Socket.IO on the same port sends `post:new` with `{ id, authorId }`. Connect with `auth: { token }`.
 
 ## Auth API
 

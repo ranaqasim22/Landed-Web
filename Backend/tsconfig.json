@@ -37,6 +37,9 @@
       "path": "./apps/identity/tsconfig.app.json"
     },
     {
+      "path": "./apps/community/tsconfig.app.json"
+    },
+    {
       "path": "./libs/common/tsconfig.lib.json"
     }
   ]

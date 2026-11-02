@@ -19,6 +19,15 @@
         "tsConfigPath": "apps/identity/tsconfig.app.json"
       }
     },
+    "community": {
+      "type": "application",
+      "root": "apps/community",
+      "entryFile": "main",
+      "sourceRoot": "apps/community/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/community/tsconfig.app.json"
+      }
+    },
     "gateway": {
       "type": "application",
       "root": "apps/gateway",

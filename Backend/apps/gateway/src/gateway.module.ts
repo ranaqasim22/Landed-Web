@@ -4,11 +4,13 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ClientsModule } from '@nestjs/microservices';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import {
+  COMMUNITY_SERVICE,
   createLoggerModule,
   IDENTITY_SERVICE,
   redisTransport,
 } from '@app/common';
 import { AuthModule } from './auth/auth.module.js';
+import { CommunityModule } from './community/community.module.js';
 import { AllExceptionsFilter } from './common/all-exceptions.filter.js';
 import { HealthController } from './health/health.controller.js';
 import { UsersModule } from './users/users.module.js';
@@ -29,10 +31,16 @@ import { UsersModule } from './users/users.module.js';
           inject: [ConfigService],
           useFactory: redisTransport,
         },
+        {
+          name: COMMUNITY_SERVICE,
+          inject: [ConfigService],
+          useFactory: redisTransport,
+        },
       ],
     }),
     AuthModule,
     UsersModule,
+    CommunityModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -14,6 +14,7 @@ export const IdentityPatterns = {
   deleteAccount: 'auth.delete-account',
   getMe: 'users.get-me',
   updateMe: 'users.update-me',
+  getUserCards: 'users.get-cards',
 } as const;
 
 export const TARGET_DEGREES = [
@@ -59,6 +60,12 @@ export interface PublicUser {
   onboardingCompleted: boolean;
   onboardingSkipped: boolean;
 }
+
+// What other people can see about someone, so it never includes their email.
+export type UserCard = Pick<
+  PublicUser,
+  'id' | 'fullName' | 'avatarUrl' | 'intake' | 'embassy'
+>;
 
 export type UpdateProfileInput = Partial<Omit<PublicUser, 'id' | 'email'>>;
 

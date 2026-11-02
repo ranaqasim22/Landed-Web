@@ -7,16 +7,18 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "build": "nest build",
+    "build": "node init && nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "lint": "oxlint --type-aware apps/ libs/",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
-    "start:gateway": "nest start gateway --watch",
-    "start:identity": "nest start identity --watch",
-    "typecheck": "tsc --noEmit -p apps/gateway/tsconfig.app.json && tsc --noEmit -p apps/identity/tsconfig.app.json"
+    "start:gateway": "node init && nest start gateway --watch",
+    "start:identity": "node init && nest start identity --watch",
+    "start:community": "node init && nest start community --watch",
+    "seed": "nest build community && node dist/apps/community/main --seed",
+    "typecheck": "tsc --noEmit -p apps/gateway/tsconfig.app.json && tsc --noEmit -p apps/identity/tsconfig.app.json && tsc --noEmit -p apps/community/tsconfig.app.json"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1161.0",
@@ -29,8 +31,10 @@
     "@nestjs/microservices": "^12.3.2",
     "@nestjs/mongoose": "^12.0.0",
     "@nestjs/platform-express": "^12.0.1",
+    "@nestjs/platform-socket.io": "^12.3.2",
     "@nestjs/swagger": "^12.0.5",
     "@nestjs/throttler": "^6.7.1",
+    "@nestjs/websockets": "^12.3.2",
     "argon2": "^0.45.1",
     "bullmq": "^6.5.3",
     "class-transformer": "^0.5.1",
@@ -45,7 +49,8 @@
     "pino": "^10.4.0",
     "pino-http": "^11.0.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.8.4"
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.0",
