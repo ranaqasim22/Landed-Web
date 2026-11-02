@@ -12,9 +12,15 @@ export class MailProcessor extends WorkerHost {
   constructor(config: ConfigService) {
     super();
     this.from = config.getOrThrow<string>('MAIL_FROM');
+    const user = config.get<string>('SMTP_USER');
     this.transporter = createTransport({
       host: config.getOrThrow<string>('SMTP_HOST'),
       port: Number(config.getOrThrow<string>('SMTP_PORT')),
+      // Mailpit has no login. A real provider does, and the password must never travel unencrypted.
+      ...(user && {
+        auth: { user, pass: config.getOrThrow<string>('SMTP_PASS') },
+        requireTLS: true,
+      }),
     });
   }
 
