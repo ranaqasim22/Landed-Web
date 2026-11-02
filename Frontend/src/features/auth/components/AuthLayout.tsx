@@ -7,6 +7,8 @@ import {
   UsersIcon,
 } from 'lucide-react'
 import { Outlet } from 'react-router-dom'
+// Photo by Denise Leisner on Unsplash: https://unsplash.com/photos/PuuesYxncdA
+import campusPhoto from '@/assets/auth-campus.webp'
 import { ThemeToggle } from './ThemeToggle'
 
 const features = [
@@ -37,25 +39,33 @@ const journey = ['Search', 'Apply', 'Visa', 'Germany']
 export function AuthLayout() {
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
-      <aside className="hidden flex-col justify-center border-r p-16 lg:flex">
-        <div className="max-w-xl space-y-8">
+      {/* Always uses the dark colours because its text sits on a darkened photo in both themes. */}
+      <aside className="dark relative hidden flex-col justify-center overflow-hidden bg-background p-16 text-foreground lg:flex">
+        {/* A background image, so phones that hide this panel never download it. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 animate-slow-zoom bg-cover bg-center"
+          style={{ backgroundImage: `url(${campusPhoto})` }}
+        />
+        <div aria-hidden className="absolute inset-0 bg-black/65" />
+        <div className="relative max-w-xl space-y-8">
           <div className="space-y-3">
             <p className="text-2xl font-semibold tracking-tight whitespace-nowrap xl:text-4xl">
               Study in Germany — together
             </p>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg">
               Everything you need, from your first search to your first day. Free to join.
             </p>
           </div>
           <ul className="grid gap-3 xl:grid-cols-2">
             {features.map(({ icon: Icon, title, text }) => (
-              <li key={title} className="flex gap-3 rounded-xl border bg-card p-4 xl:flex-col">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              <li key={title} className="flex gap-3 rounded-xl border bg-black/40 p-4 backdrop-blur-sm xl:flex-col">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white/10">
                   <Icon aria-hidden className="size-5 text-link" />
                 </span>
                 <div className="space-y-1">
                   <p className="font-semibold">{title}</p>
-                  <p className="text-sm text-muted-foreground">{text}</p>
+                  <p className="text-sm">{text}</p>
                 </div>
               </li>
             ))}
@@ -66,7 +76,7 @@ export function AuthLayout() {
               {journey.map((stop, index) => (
                 <li key={stop} className="flex items-center gap-2">
                   {index > 0 && (
-                    <ChevronRightIcon aria-hidden className="size-4 text-muted-foreground" />
+                    <ChevronRightIcon aria-hidden className="size-4" />
                   )}
                   {stop}
                 </li>
