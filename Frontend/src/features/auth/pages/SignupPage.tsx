@@ -50,8 +50,6 @@ export function SignupPage() {
         </>
       }
     >
-      <GoogleAuthButton text="signup_with" />
-      <AuthDivider />
       <FormProvider {...form}>
         <form
           noValidate
@@ -124,6 +122,8 @@ export function SignupPage() {
           </SubmitButton>
         </form>
       </FormProvider>
+      <AuthDivider />
+      <GoogleAuthButton text="signup_with" />
     </AuthCard>
   )
 }

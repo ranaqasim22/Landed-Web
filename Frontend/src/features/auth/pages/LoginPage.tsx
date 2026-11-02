@@ -31,8 +31,6 @@ export function LoginPage() {
         </>
       }
     >
-      <GoogleAuthButton text="continue_with" />
-      <AuthDivider />
       <form
         noValidate
         onSubmit={handleSubmit((values) => login.mutate(values))}
@@ -75,6 +73,8 @@ export function LoginPage() {
           Log in
         </SubmitButton>
       </form>
+      <AuthDivider />
+      <GoogleAuthButton text="continue_with" />
     </AuthCard>
   )
 }

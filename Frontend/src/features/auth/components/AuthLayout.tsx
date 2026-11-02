@@ -1,6 +1,5 @@
 import { GraduationCapIcon, ListChecksIcon, UsersIcon } from 'lucide-react'
 import { Outlet } from 'react-router-dom'
-import logo from '@/assets/logo.png'
 import { ThemeToggle } from './ThemeToggle'
 
 const benefits = [
@@ -13,7 +12,6 @@ export function AuthLayout() {
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
       <aside className="hidden flex-col justify-center gap-10 border-r p-16 lg:flex">
-        <img src={logo} alt="" className="size-20" />
         <p className="text-2xl font-semibold tracking-tight whitespace-nowrap xl:text-4xl">
           Study in Germany — together
         </p>

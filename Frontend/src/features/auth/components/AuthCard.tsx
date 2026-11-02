@@ -20,8 +20,8 @@ export function AuthCard({ title, subtitle, footer, children }: AuthCardProps) {
   return (
     <Card className="w-full max-w-[420px] border-0 bg-transparent py-0 shadow-none lg:border lg:bg-card lg:py-8 lg:shadow-sm">
       <title>{`${title} · Landed`}</title>
-      <CardHeader className="px-0 lg:px-8">
-        <img src={logo} alt="Landed" className="mb-2 size-14 lg:hidden" />
+      <CardHeader className="justify-items-center px-0 text-center lg:px-8">
+        <img src={logo} alt="Landed" className="mb-2 size-16" />
         <CardTitle>
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
         </CardTitle>
