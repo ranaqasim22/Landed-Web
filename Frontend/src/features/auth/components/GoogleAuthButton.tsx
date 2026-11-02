@@ -4,7 +4,7 @@ import { Loader2Icon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getAuthErrorMessage } from '../api/auth.errors'
 import { useGoogleAuth } from '../hooks/use-auth-mutations'
-import { FormAlert } from './FormAlert'
+import { FormAlert } from '@/components/common/FormAlert'
 
 type GoogleText = 'continue_with' | 'signup_with'
 

@@ -1,9 +1,21 @@
 import { api } from '@/lib/api'
 
+export type Intake = { season: 'WS' | 'SS'; year: number }
+
 export type AuthUser = {
   id: string
   email: string
   fullName: string
+  country?: string
+  targetDegree?: string
+  fieldOfStudy?: string
+  intake?: Intake
+  stage?: string
+  embassy?: string
+  avatarUrl?: string | null
+  bio?: string
+  onboardingCompleted: boolean
+  onboardingSkipped: boolean
 }
 
 export type AuthSession = {

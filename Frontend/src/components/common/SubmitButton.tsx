@@ -1,6 +1,7 @@
 import type { ComponentProps } from 'react'
 import { Loader2Icon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 type SubmitButtonProps = ComponentProps<typeof Button> & {
   isPending: boolean
@@ -11,6 +12,7 @@ export function SubmitButton({
   isPending,
   pendingLabel,
   disabled,
+  className,
   children,
   ...props
 }: SubmitButtonProps) {
@@ -18,7 +20,7 @@ export function SubmitButton({
     <Button
       type="submit"
       disabled={disabled || isPending}
-      className="h-11 w-full"
+      className={cn('h-11 w-full', className)}
       {...props}
     >
       {isPending && <Loader2Icon aria-hidden className="animate-spin" />}

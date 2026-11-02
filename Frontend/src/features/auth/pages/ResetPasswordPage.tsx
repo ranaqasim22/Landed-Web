@@ -4,9 +4,9 @@ import { useParams } from 'react-router-dom'
 import { getAuthErrorMessage } from '../api/auth.errors'
 import { AuthCard } from '../components/AuthCard'
 import { AuthLink } from '../components/AuthLink'
-import { FormAlert } from '../components/FormAlert'
+import { FormAlert } from '@/components/common/FormAlert'
 import { NewPasswordFields } from '../components/NewPasswordFields'
-import { SubmitButton } from '../components/SubmitButton'
+import { SubmitButton } from '@/components/common/SubmitButton'
 import { useResetPassword } from '../hooks/use-auth-mutations'
 import {
   resetPasswordSchema,

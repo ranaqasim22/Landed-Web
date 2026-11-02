@@ -1,7 +1,7 @@
 import { useState, type ComponentProps } from 'react'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { FormField } from './FormField'
+import { FormField } from '@/components/common/FormField'
 
 export function PasswordField(
   props: Omit<ComponentProps<typeof FormField>, 'type' | 'endAdornment'>,

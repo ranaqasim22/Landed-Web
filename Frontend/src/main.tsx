@@ -7,7 +7,10 @@ import { Toaster } from '@/components/ui/sonner'
 import { App } from './App'
 import './index.css'
 
-const queryClient = new QueryClient()
+// By default a request made offline waits silently. We want it to fail so people see why and can retry.
+const queryClient = new QueryClient({
+  defaultOptions: { mutations: { networkMode: 'always' } },
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

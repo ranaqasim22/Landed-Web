@@ -33,10 +33,14 @@ vi.mock('@react-oauth/google', () => ({
   ),
 }))
 
-const session = {
-  user: { id: '1', email: 'ana@example.com', fullName: 'Ana Silva' },
-  accessToken: 'token',
+const user = {
+  id: '1',
+  email: 'ana@example.com',
+  fullName: 'Ana Silva',
+  onboardingCompleted: true,
+  onboardingSkipped: false,
 }
+const session = { user, accessToken: 'token' }
 
 function httpError(status: number) {
   const config = { headers: new AxiosHeaders() }
@@ -63,75 +67,75 @@ const button = (name: RegExp) => screen.getByRole('button', { name })
 
 beforeEach(() => {
   vi.clearAllMocks()
-  useAuthStore.setState({ user: null, accessToken: null, isNewUser: false })
+  useAuthStore.setState({ user: null, accessToken: null, isSessionChecked: true })
 })
 
 describe('LoginPage', () => {
   async function fillLogin() {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/login')
-    await user.type(field(/^email/i), 'ana@example.com')
-    await user.type(field(/^password/i), 'secret')
+    await actor.type(field(/^email/i), 'ana@example.com')
+    await actor.type(field(/^password/i), 'secret')
     await waitFor(() => expect(button(/^log in$/i)).toBeEnabled())
-    return user
+    return actor
   }
 
   it('autofocuses email and keeps submit disabled until valid', async () => {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/login')
     expect(field(/^email/i)).toHaveFocus()
     expect(button(/^log in$/i)).toBeDisabled()
-    await user.type(field(/^email/i), 'ana@example.com')
-    await user.type(field(/^password/i), 'secret')
+    await actor.type(field(/^email/i), 'ana@example.com')
+    await actor.type(field(/^password/i), 'secret')
     await waitFor(() => expect(button(/^log in$/i)).toBeEnabled())
   })
 
   it('validates on blur, links the error, and clears it live while fixing', async () => {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/login')
     const email = field(/^email/i)
-    await user.type(email, 'nope')
+    await actor.type(email, 'nope')
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-    await user.tab()
+    await actor.tab()
     const error = await screen.findByText(/enter a valid email/i)
     expect(email).toHaveAttribute('aria-invalid', 'true')
     expect(email).toHaveAttribute('aria-describedby', error.id)
-    await user.type(email, '@example.com')
+    await actor.type(email, '@example.com')
     await waitFor(() =>
       expect(screen.queryByText(/enter a valid email/i)).not.toBeInTheDocument(),
     )
   })
 
   it('does not flag an empty field when leaving for a link', async () => {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/login')
-    await user.click(screen.getByRole('link', { name: /forgot password/i }))
+    await actor.click(screen.getByRole('link', { name: /forgot password/i }))
     expect(await heading('Forgot your password?')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('does not flag a half-typed email when leaving for a link', async () => {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/login')
-    await user.type(field(/^email/i), 'ana@')
-    await user.click(screen.getByRole('link', { name: /forgot password/i }))
+    await actor.type(field(/^email/i), 'ana@')
+    await actor.click(screen.getByRole('link', { name: /forgot password/i }))
     expect(await heading('Forgot your password?')).toBeInTheDocument()
   })
 
   it('flags an empty field when tabbing to the next one', async () => {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/login')
-    await user.tab()
+    await actor.tab()
     expect(field(/^password/i)).toHaveFocus()
     expect(await screen.findByText(/enter a valid email/i)).toBeInTheDocument()
   })
 
   it('toggles password visibility with an accessible button', async () => {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/login')
     const password = field(/^password/i)
     expect(password).toHaveAttribute('type', 'password')
-    await user.click(button(/show password/i))
+    await actor.click(button(/show password/i))
     expect(password).toHaveAttribute('type', 'text')
     expect(button(/hide password/i)).toBeInTheDocument()
   })
@@ -140,9 +144,9 @@ describe('LoginPage', () => {
     const pending = deferred<typeof session>()
     vi.mocked(authApi.login).mockReturnValue(pending.promise)
     const success = vi.spyOn(toast, 'success')
-    const user = await fillLogin()
+    const actor = await fillLogin()
 
-    await user.keyboard('{Enter}')
+    await actor.keyboard('{Enter}')
     const loading = await screen.findByRole('button', { name: /logging in/i })
     expect(loading).toBeDisabled()
     fireEvent.click(loading)
@@ -162,8 +166,8 @@ describe('LoginPage', () => {
     [429, 'Too many attempts, try again in a minute'],
   ])('explains a %i response in plain words', async (status, message) => {
     vi.mocked(authApi.login).mockRejectedValue(httpError(status))
-    const user = await fillLogin()
-    await user.click(button(/^log in$/i))
+    const actor = await fillLogin()
+    await actor.click(button(/^log in$/i))
     expect(await screen.findByRole('alert')).toHaveTextContent(message)
     expect(button(/^log in$/i)).toBeEnabled()
   })
@@ -171,8 +175,8 @@ describe('LoginPage', () => {
   it('explains being offline', async () => {
     vi.mocked(authApi.login).mockRejectedValue(new AxiosError('Network Error'))
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
-    const user = await fillLogin()
-    await user.click(button(/^log in$/i))
+    const actor = await fillLogin()
+    await actor.click(button(/^log in$/i))
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'No internet — check your connection and try again',
     )
@@ -180,14 +184,14 @@ describe('LoginPage', () => {
 
   it('sends unverified users to the verify page', async () => {
     vi.mocked(authApi.login).mockRejectedValue(httpError(403))
-    const user = await fillLogin()
-    await user.click(button(/^log in$/i))
+    const actor = await fillLogin()
+    await actor.click(button(/^log in$/i))
     expect(await heading('Check your inbox')).toBeInTheDocument()
     expect(screen.getByText('ana@example.com')).toBeInTheDocument()
   })
 
   it.each(['/login', '/signup'])('redirects logged-in users away from %s', async (path) => {
-    useAuthStore.setState({ accessToken: 'token' })
+    useAuthStore.setState({ user, accessToken: 'token' })
     renderApp(path)
     expect(await heading('Home')).toBeInTheDocument()
   })
@@ -195,27 +199,31 @@ describe('LoginPage', () => {
 
 describe('Google sign-in', () => {
   it('sends the ID token and takes new users to onboarding', async () => {
-    vi.mocked(authApi.google).mockResolvedValue({ ...session, isNewUser: true })
-    const user = userEvent.setup()
+    vi.mocked(authApi.google).mockResolvedValue({
+      user: { ...user, onboardingCompleted: false },
+      accessToken: 'token',
+      isNewUser: true,
+    })
+    const actor = userEvent.setup()
     renderApp('/signup')
     expect(screen.getByText('We only use your name and email.')).toBeInTheDocument()
-    await user.click(button(/^google$/i))
-    expect(await heading('Onboarding')).toBeInTheDocument()
+    await actor.click(button(/^google$/i))
+    expect(await heading('What are you planning?')).toBeInTheDocument()
     expect(vi.mocked(authApi.google).mock.calls[0][0]).toEqual({ idToken: 'google-id-token' })
   })
 
   it('takes existing users home', async () => {
     vi.mocked(authApi.google).mockResolvedValue({ ...session, isNewUser: false })
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/login')
-    await user.click(button(/^google$/i))
+    await actor.click(button(/^google$/i))
     expect(await heading('Home')).toBeInTheDocument()
   })
 
   it('stays quiet when no credential comes back', async () => {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/login')
-    await user.click(button(/google no credential/i))
+    await actor.click(button(/google no credential/i))
     expect(authApi.google).not.toHaveBeenCalled()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
@@ -223,9 +231,9 @@ describe('Google sign-in', () => {
   it('shows a loading state while the backend responds', async () => {
     const pending = deferred<typeof session>()
     vi.mocked(authApi.google).mockReturnValue(pending.promise)
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/login')
-    await user.click(button(/^google$/i))
+    await actor.click(button(/^google$/i))
     expect(
       await screen.findByRole('button', { name: /signing in with google/i }),
     ).toBeDisabled()
@@ -234,37 +242,37 @@ describe('Google sign-in', () => {
 })
 
 describe('SignupPage', () => {
-  async function fillSignup(user: ReturnType<typeof userEvent.setup>) {
-    await user.type(field(/full name/i), 'Ana Silva')
-    await user.type(field(/^email/i), 'ana@example.com')
-    await user.type(field(/^password/i), 'abcd1234')
-    await user.type(field(/confirm password/i), 'abcd1234')
-    await user.click(screen.getByRole('checkbox'))
+  async function fillSignup(actor: ReturnType<typeof userEvent.setup>) {
+    await actor.type(field(/full name/i), 'Ana Silva')
+    await actor.type(field(/^email/i), 'ana@example.com')
+    await actor.type(field(/^password/i), 'abcd1234')
+    await actor.type(field(/confirm password/i), 'abcd1234')
+    await actor.click(screen.getByRole('checkbox'))
     await waitFor(() => expect(button(/create account/i)).toBeEnabled())
   }
 
   it('updates the checklist and strength hint as the user types', async () => {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/signup')
     const rule = screen.getByText('At least 8 characters')
     expect(rule).toHaveTextContent('Not yet:')
-    await user.type(field(/^password/i), 'abcd1234')
+    await actor.type(field(/^password/i), 'abcd1234')
     expect(rule).toHaveTextContent('Done:')
     expect(screen.getByText('Password strength: Good')).toBeInTheDocument()
     expect(field(/^password/i)).toHaveAttribute('aria-describedby', 'password-rules')
   })
 
   it('requires the terms and does not pre-check them', async () => {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/signup')
-    await user.type(field(/full name/i), 'Ana Silva')
-    await user.type(field(/^email/i), 'ana@example.com')
-    await user.type(field(/^password/i), 'abcd1234')
-    await user.type(field(/confirm password/i), 'abcd1234')
+    await actor.type(field(/full name/i), 'Ana Silva')
+    await actor.type(field(/^email/i), 'ana@example.com')
+    await actor.type(field(/^password/i), 'abcd1234')
+    await actor.type(field(/confirm password/i), 'abcd1234')
     const terms = screen.getByRole('checkbox')
     expect(terms).not.toBeChecked()
     expect(button(/create account/i)).toBeDisabled()
-    await user.click(terms)
+    await actor.click(terms)
     await waitFor(() => expect(button(/create account/i)).toBeEnabled())
   })
 
@@ -276,32 +284,32 @@ describe('SignupPage', () => {
   })
 
   it('flags a mismatch and re-checks it when the first password changes', async () => {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/signup')
-    await user.type(field(/^password/i), 'abcd1234')
-    await user.type(field(/confirm password/i), 'abcd12345')
-    await user.tab()
+    await actor.type(field(/^password/i), 'abcd1234')
+    await actor.type(field(/confirm password/i), 'abcd12345')
+    await actor.tab()
     expect(await screen.findByText("Passwords don't match")).toBeInTheDocument()
-    await user.type(field(/^password/i), '5')
+    await actor.type(field(/^password/i), '5')
     await waitFor(() =>
       expect(screen.queryByText("Passwords don't match")).not.toBeInTheDocument(),
     )
   })
 
   it('does not nag about confirmation before the user reaches it', async () => {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/signup')
-    await user.type(field(/^password/i), 'abcd1234')
+    await actor.type(field(/^password/i), 'abcd1234')
     expect(screen.queryByText('Confirm your password')).not.toBeInTheDocument()
   })
 
   it('submits, drops client-only fields, and goes to verify email', async () => {
     const pending = deferred<void>()
     vi.mocked(authApi.signup).mockReturnValue(pending.promise)
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/signup')
-    await fillSignup(user)
-    await user.click(button(/create account/i))
+    await fillSignup(actor)
+    await actor.click(button(/create account/i))
     expect(await screen.findByRole('button', { name: /creating account/i })).toBeDisabled()
     expect(vi.mocked(authApi.signup).mock.calls[0][0]).toEqual({
       fullName: 'Ana Silva',
@@ -314,10 +322,10 @@ describe('SignupPage', () => {
 
   it('explains a duplicate email', async () => {
     vi.mocked(authApi.signup).mockRejectedValue(httpError(409))
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/signup')
-    await fillSignup(user)
-    await user.click(button(/create account/i))
+    await fillSignup(actor)
+    await actor.click(button(/create account/i))
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'An account with this email already exists',
     )
@@ -365,11 +373,11 @@ describe('VerifyEmailPage', () => {
 describe('ForgotPasswordPage', () => {
   it('shows the same neutral message on success', async () => {
     vi.mocked(authApi.forgotPassword).mockResolvedValue()
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/forgot-password')
-    await user.type(field(/^email/i), 'ana@example.com')
+    await actor.type(field(/^email/i), 'ana@example.com')
     await waitFor(() => expect(button(/send reset link/i)).toBeEnabled())
-    await user.click(button(/send reset link/i))
+    await actor.click(button(/send reset link/i))
     expect(await screen.findByRole('status')).toHaveTextContent(
       'If an account exists, we sent a reset link',
     )
@@ -379,12 +387,12 @@ describe('ForgotPasswordPage', () => {
 
 describe('ResetPasswordPage', () => {
   async function fillReset() {
-    const user = userEvent.setup()
+    const actor = userEvent.setup()
     renderApp('/reset-password/abc123')
-    await user.type(field(/new password/i), 'abcd1234')
-    await user.type(field(/confirm password/i), 'abcd1234')
+    await actor.type(field(/new password/i), 'abcd1234')
+    await actor.type(field(/confirm password/i), 'abcd1234')
     await waitFor(() => expect(button(/update password/i)).toBeEnabled())
-    await user.click(button(/update password/i))
+    await actor.click(button(/update password/i))
   }
 
   it('sends the URL token, then redirects to login with a toast', async () => {

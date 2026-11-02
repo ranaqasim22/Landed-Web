@@ -4,9 +4,9 @@ import { useForm } from 'react-hook-form'
 import { getAuthErrorMessage } from '../api/auth.errors'
 import { AuthCard } from '../components/AuthCard'
 import { AuthLink } from '../components/AuthLink'
-import { FormAlert } from '../components/FormAlert'
-import { FormField } from '../components/FormField'
-import { SubmitButton } from '../components/SubmitButton'
+import { FormAlert } from '@/components/common/FormAlert'
+import { FormField } from '@/components/common/FormField'
+import { SubmitButton } from '@/components/common/SubmitButton'
 import { useForgotPassword } from '../hooks/use-auth-mutations'
 import {
   forgotPasswordSchema,
