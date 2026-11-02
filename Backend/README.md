@@ -8,10 +8,10 @@ The browser only talks to the **gateway**. It handles HTTP concerns (validation,
 
 | App | Responsibility | Status |
 | --- | --- | --- |
-| `apps/gateway` | Public REST API at `/api` | Running |
-| `apps/identity` | Auth and users | Auth done |
+| `apps/gateway` | Public REST API at `/api` and upload signing | Running |
+| `apps/identity` | Auth and users | Auth and profiles done |
 | `apps/community` | Feed, communities, notifications, realtime, moderation | Planned |
-| `apps/catalog` | Universities, programs, shortlist, uploads | Planned |
+| `apps/catalog` | Universities, programs, shortlist | Planned |
 | `apps/visa` | Visa timelines and stats | Planned |
 | `apps/learning` | German course | Planned |
 
@@ -38,6 +38,7 @@ docker compose up --build
 | Swagger | http://localhost:3000/api/docs |
 | Health check | http://localhost:3000/api/health |
 | Emails sent in development | http://localhost:8025 |
+| Uploaded files in development | http://localhost:9000 |
 
 To enable Google sign-in, create a `.env` file next to `docker-compose.yml` with `GOOGLE_CLIENT_ID=<your client id>`.
 
@@ -48,7 +49,7 @@ Needs Node 24 (`nvm use 24`).
 ```
 npm install
 cp .env.example .env
-docker compose up mongo redis mailpit
+docker compose up mongo redis mailpit storage storage-setup
 npm run start:identity
 npm run start:gateway
 ```
@@ -79,3 +80,13 @@ The first test run downloads a MongoDB binary, so it takes a little longer.
 | `DELETE /api/auth/account` | Bearer token | 204. Deletes the user and their tokens |
 
 Access tokens last 15 minutes. Refresh tokens last 30 days, rotate on every use and are stored only as hashes. Replaying an old refresh token ends that session.
+
+## Profile and uploads API
+
+| Endpoint | Body | Result |
+| --- | --- | --- |
+| `GET /api/users/me` | Bearer token | The current user |
+| `PATCH /api/users/me` | Any of `fullName, country, targetDegree, fieldOfStudy, intake, stage, embassy, avatarUrl, bio, onboardingCompleted, onboardingSkipped` | The updated user. `onboardingCompleted` needs a degree and intake saved |
+| `POST /api/uploads/presign` | `contentType, size` | `{ uploadUrl, fileUrl }`. JPG, PNG or WebP up to 5 MB. Send the file with `PUT` to `uploadUrl` |
+
+In production, point the `S3_*` variables at Cloudflare R2 and allow your site in the bucket CORS settings.

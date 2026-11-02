@@ -73,6 +73,8 @@ export class AuthController {
     return this.toClientSession(session, response);
   }
 
+  // Runs on every page load, so it needs more room than the login routes.
+  @Throttle({ default: { ttl: 60_000, limit: 60 } })
   @Post('refresh')
   @HttpCode(200)
   async refresh(

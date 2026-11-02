@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import type { AccessTokenPayload, AuthSession } from '@app/common';
 import { Model, Types } from 'mongoose';
+import { toPublicUser } from '../users/to-public-user.js';
 import type { UserDocument } from '../users/user.schema.js';
 import { RefreshToken } from './schemas/refresh-token.schema.js';
 import { generateToken, hashToken } from './secure-token.js';
@@ -35,7 +36,7 @@ export class SessionService {
     });
     const payload: AccessTokenPayload = { sub: user.id };
     return {
-      user: { id: user.id, email: user.email, fullName: user.fullName },
+      user: toPublicUser(user),
       accessToken: await this.jwt.signAsync(payload),
       refreshToken,
       refreshExpiresAt: expiresAt.toISOString(),

@@ -34,6 +34,32 @@ services:
     image: axllent/mailpit
     ports: ["8025:8025", "1025:1025"]
 
+  storage:
+    image: rustfs/rustfs
+    ports: ["9000:9000"]
+    environment:
+      RUSTFS_ACCESS_KEY: landed
+      RUSTFS_SECRET_KEY: landed-dev-secret
+    volumes: ["storage-data:/data"]
+
+  # Creates the bucket on first boot and makes its files publicly readable, like R2 in production.
+  storage-setup:
+    image: amazon/aws-cli
+    depends_on: [storage]
+    environment:
+      AWS_ACCESS_KEY_ID: landed
+      AWS_SECRET_ACCESS_KEY: landed-dev-secret
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ENDPOINT_URL: http://storage:9000
+    entrypoint:
+      - sh
+      - -c
+      - |
+        until aws s3api list-buckets > /dev/null 2>&1; do sleep 1; done
+        aws s3api create-bucket --bucket landed-uploads 2> /dev/null
+        aws s3api put-bucket-policy --bucket landed-uploads --policy '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":"*","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::landed-uploads/*"]}]}'
+        aws s3api put-bucket-cors --bucket landed-uploads --cors-configuration '{"CORSRules":[{"AllowedOrigins":["http://localhost:5173"],"AllowedMethods":["PUT","GET"],"AllowedHeaders":["*"]}]}'
+
   identity:
     build:
       context: .
@@ -58,9 +84,17 @@ services:
     environment:
       <<: *service-env
       PORT: 3000
+      # Signing doesn't connect to storage. Browsers use this address, so it stays localhost.
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://localhost:9000}
+      S3_REGION: ${S3_REGION:-auto}
+      S3_BUCKET: ${S3_BUCKET:-landed-uploads}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-landed}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-landed-dev-secret}
+      S3_PUBLIC_URL: ${S3_PUBLIC_URL:-http://localhost:9000/landed-uploads}
     depends_on:
       redis: { condition: service_healthy }
       identity: { condition: service_started }
 
 volumes:
   mongo-data:
+  storage-data:

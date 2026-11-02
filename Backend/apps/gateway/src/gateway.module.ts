@@ -11,6 +11,7 @@ import {
 import { AuthModule } from './auth/auth.module.js';
 import { AllExceptionsFilter } from './common/all-exceptions.filter.js';
 import { HealthController } from './health/health.controller.js';
+import { UsersModule } from './users/users.module.js';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { HealthController } from './health/health.controller.js';
       ],
     }),
     AuthModule,
+    UsersModule,
   ],
   controllers: [HealthController],
   providers: [

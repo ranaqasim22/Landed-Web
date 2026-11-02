@@ -12,13 +12,55 @@ export const IdentityPatterns = {
   forgotPassword: 'auth.forgot-password',
   resetPassword: 'auth.reset-password',
   deleteAccount: 'auth.delete-account',
+  getMe: 'users.get-me',
+  updateMe: 'users.update-me',
 } as const;
+
+export const TARGET_DEGREES = [
+  'bachelor',
+  'master',
+  'phd',
+  'language_course',
+  'other',
+] as const;
+
+export const APPLICATION_STAGES = [
+  'exploring',
+  'shortlisting',
+  'applied',
+  'admitted',
+  'visa_applied',
+  'visa_received',
+] as const;
+
+export const INTAKE_SEASONS = ['WS', 'SS'] as const;
+
+export type TargetDegree = (typeof TARGET_DEGREES)[number];
+export type ApplicationStage = (typeof APPLICATION_STAGES)[number];
+export type IntakeSeason = (typeof INTAKE_SEASONS)[number];
+
+export interface Intake {
+  season: IntakeSeason;
+  year: number;
+}
 
 export interface PublicUser {
   id: string;
   email: string;
   fullName: string;
+  country?: string;
+  targetDegree?: TargetDegree;
+  fieldOfStudy?: string;
+  intake?: Intake;
+  stage?: ApplicationStage;
+  embassy?: string;
+  avatarUrl?: string | null;
+  bio?: string;
+  onboardingCompleted: boolean;
+  onboardingSkipped: boolean;
 }
+
+export type UpdateProfileInput = Partial<Omit<PublicUser, 'id' | 'email'>>;
 
 export interface AuthSession {
   user: PublicUser;
