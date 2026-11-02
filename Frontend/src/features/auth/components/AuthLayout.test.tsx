@@ -13,7 +13,7 @@ function renderLayout() {
       </Routes>
     </MemoryRouter>,
   )
-  return () => (container.firstChild as HTMLElement).style.getPropertyValue('--slide-color')
+  return () => container.querySelector('img:not(.opacity-0)')?.getAttribute('src')
 }
 
 const wait = (ms: number) => act(() => vi.advanceTimersByTime(ms))
@@ -29,34 +29,34 @@ describe('AuthLayout slideshow', () => {
     vi.mocked(window.matchMedia).mockReturnValue({ matches: false } as MediaQueryList)
   })
 
-  it('changes the photo and the matching colour every 5 seconds, then loops', () => {
-    const color = renderLayout()
-    const first = color()
+  it('changes the photo every 5 seconds, then loops', () => {
+    const photo = renderLayout()
+    const first = photo()
     wait(4999)
-    expect(color()).toBe(first)
+    expect(photo()).toBe(first)
     wait(1)
-    expect(color()).not.toBe(first)
+    expect(photo()).not.toBe(first)
     wait(15000)
-    expect(color()).toBe(first)
+    expect(photo()).toBe(first)
   })
 
   it('stops when paused and carries on when played again', () => {
-    const color = renderLayout()
-    const first = color()
+    const photo = renderLayout()
+    const first = photo()
     fireEvent.click(screen.getByRole('button', { name: 'Pause the photos' }))
     wait(20000)
-    expect(color()).toBe(first)
+    expect(photo()).toBe(first)
     fireEvent.click(screen.getByRole('button', { name: 'Play the photos' }))
     wait(5000)
-    expect(color()).not.toBe(first)
+    expect(photo()).not.toBe(first)
   })
 
   it('starts still for people who prefer reduced motion', () => {
     vi.mocked(window.matchMedia).mockReturnValue({ matches: true } as MediaQueryList)
-    const color = renderLayout()
-    const first = color()
+    const photo = renderLayout()
+    const first = photo()
     wait(20000)
-    expect(color()).toBe(first)
+    expect(photo()).toBe(first)
     expect(screen.getByRole('button', { name: 'Play the photos' })).toBeInTheDocument()
   })
 

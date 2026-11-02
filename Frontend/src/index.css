@@ -103,6 +103,21 @@
 }
 
 @layer components {
+  /* See-through surfaces pick up the photo behind them, so their text needs stronger colours. */
+  .glass-surface {
+    --muted-foreground: #404040;
+    --link: #8f0d0d;
+    --destructive: #8f1a12;
+    --success: #035c43;
+    --input: #6b6b6b;
+  }
+  .dark .glass-surface {
+    --muted-foreground: #d4d4d4;
+    --link: #ffc933;
+    --destructive: #ff9c94;
+    --success: #34d399;
+    --input: #858585;
+  }
   .auth-link {
     @apply rounded-sm font-medium text-link underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring;
   }
