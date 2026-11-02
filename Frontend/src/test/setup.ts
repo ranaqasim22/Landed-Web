@@ -11,6 +11,8 @@ vi.stubGlobal(
   },
 )
 
+vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false })))
+
 // Popovers and the searchable list rely on browser features jsdom doesn't have.
 Element.prototype.scrollIntoView = () => {}
 Element.prototype.hasPointerCapture = () => false
