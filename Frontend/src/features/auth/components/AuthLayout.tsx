@@ -14,7 +14,7 @@ export function AuthLayout() {
     <div className="grid min-h-dvh lg:grid-cols-2">
       <aside className="hidden flex-col justify-center gap-10 border-r p-16 lg:flex">
         <img src={logo} alt="" className="size-20" />
-        <p className="max-w-md text-4xl font-semibold tracking-tight">
+        <p className="text-2xl font-semibold tracking-tight whitespace-nowrap xl:text-4xl">
           Study in Germany — together
         </p>
         <ul className="space-y-5 text-lg">
