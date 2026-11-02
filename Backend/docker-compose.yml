@@ -78,6 +78,19 @@ services:
       mongo: { condition: service_healthy }
       redis: { condition: service_healthy }
 
+  community:
+    build:
+      context: .
+      args: { APP: community }
+    environment:
+      <<: *service-env
+      COMMUNITY_MONGODB_URI: mongodb://mongo:27017/landed_community?replicaSet=rs0
+      # Only the seed script reads this, to create the sample accounts.
+      IDENTITY_MONGODB_URI: mongodb://mongo:27017/landed_identity?replicaSet=rs0
+    depends_on:
+      mongo: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
   gateway:
     build:
       context: .
@@ -96,6 +109,7 @@ services:
     depends_on:
       redis: { condition: service_healthy }
       identity: { condition: service_started }
+      community: { condition: service_started }
 
 volumes:
   mongo-data:

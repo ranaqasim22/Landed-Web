@@ -13,6 +13,11 @@ export class UsersController {
     return this.users.getMe(input.userId);
   }
 
+  @MessagePattern(IdentityPatterns.getUserCards)
+  getCards(@Payload() input: { userIds: string[] }) {
+    return this.users.getCards(input.userIds);
+  }
+
   @MessagePattern(IdentityPatterns.updateMe)
   updateMe(@Payload() input: { userId: string; changes: UpdateProfileInput }) {
     return this.users.updateMe(input.userId, input.changes);

@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import { configureHttp } from './common/configure-http.js';
+import { CorsSocketAdapter } from './community/cors-socket.adapter.js';
 import { GatewayModule } from './gateway.module.js';
 
 async function bootstrap() {
@@ -11,6 +12,7 @@ async function bootstrap() {
 
   app.useLogger(app.get(Logger));
   configureHttp(app);
+  app.useWebSocketAdapter(new CorsSocketAdapter(app));
 
   const document = SwaggerModule.createDocument(
     app,

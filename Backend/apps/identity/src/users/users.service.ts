@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { PublicUser, UpdateProfileInput } from '@app/common';
+import type { PublicUser, UpdateProfileInput, UserCard } from '@app/common';
 import { Model } from 'mongoose';
 import { toPublicUser } from './to-public-user.js';
 import { User, type UserDocument } from './user.schema.js';
@@ -31,6 +31,14 @@ export class UsersService {
     }
     await user.save();
     return toPublicUser(user);
+  }
+
+  async getCards(userIds: string[]): Promise<UserCard[]> {
+    const users = await this.users.find({ _id: { $in: userIds } });
+    return users.map((user) => {
+      const { id, fullName, avatarUrl, intake, embassy } = toPublicUser(user);
+      return { id, fullName, avatarUrl, intake, embassy };
+    });
   }
 
   private async findOrThrow(userId: string): Promise<UserDocument> {
