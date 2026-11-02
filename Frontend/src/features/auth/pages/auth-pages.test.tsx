@@ -239,6 +239,18 @@ describe('Google sign-in', () => {
     ).toBeDisabled()
     await act(async () => pending.resolve(session))
   })
+
+  it('keeps the button when Google is not set up and explains only on click', async () => {
+    vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '')
+    const actor = userEvent.setup()
+    renderApp('/login')
+    const reason = /google sign-in isn't available right now/i
+    expect(screen.queryByText(reason)).not.toBeInTheDocument()
+    await actor.click(button(/continue with google/i))
+    expect(screen.getByRole('alert')).toHaveTextContent(reason)
+    expect(authApi.google).not.toHaveBeenCalled()
+    vi.unstubAllEnvs()
+  })
 })
 
 describe('SignupPage', () => {
